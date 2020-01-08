@@ -42,13 +42,12 @@ root.mainloop()
 StoreVarFile_1=open(f"D:\Documents\App development/featherlook/" + TmpFlNm,"r")
 search_word= StoreVarFile_1.readline()
 StoreVarFile_1.close()
-
+x=int()
 for x in path.glob('*.docx'):
     try:
         paragraph_list = docx2txt.process(x).splitlines()
     except:
         paragraph_list = (f"searched for: {search_word} but file could not be searched due to formatting")
-
 # search each file in directory for search_word. If in file append only the sentence and file name to corresponding lists
     for i in paragraph_list:
         if i.find(search_word)>=0:
@@ -57,16 +56,19 @@ for x in path.glob('*.docx'):
                 search_list.append(i)
                 file_list.append(x)
             else:
-                while i.count(".")>1:
-                    ChrCnt=i.find(".")
-                    SntncTmp=i[0,ChrCnt]
-                    if SntncTmp.count(search_word)>0:
+                while i.count(".") > 1:
+                    # print("made it to while statement")
+                    # x += 1
+                    ChrCnt = i.find(".")
+                    SntncTmp = i[0: ChrCnt + 1]
+
+                    if SntncTmp.count(search_word) > 0:
                         search_list.append(SntncTmp)
                         file_list.append(x)
+
+                        i = i[ChrCnt + 1:].strip()
                     else:
-                        i=
-
-
+                        i = i[ChrCnt + 1:].strip()
 
 
 InfoWindow = Tk()
