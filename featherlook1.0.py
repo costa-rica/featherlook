@@ -4,29 +4,30 @@ from tkinter import filedialog
 from pathlib import Path
 from tkinter import ttk
 import docx2txt
+import os
 
-def click():
-    search_word = entry_1.get()
-    print(search_word)
-    Text_input_window.destroy()
-
+# updated by costa_rica 8 Jan 2020
 def end_app():
     Text_input_window.destroy()
     quit()
 
+ApplctnNm="Featherlook"
 Text_input_window= Tk()
 Text_input_window.geometry('600x350+100+200')
-Text_input_window.title("Featherlook 1.1")
+Text_input_window.title(ApplctnNm +" 1.1")
 label_1=Label (Text_input_window,text="Enter search word:", bg="black", fg="white")
 label_1.grid(row=1, column=0, sticky=W)
-
 entry_1=ttk.Entry(Text_input_window, width=40, background="white")
 entry_1.grid(row=2, column=0, sticky=W)
-search_word= entry_1.get()
+TmpFlNm="StoreVar" + ApplctnNm + ".txt"
+def click():
+    StoreVarFile=open(TmpFlNm, "w+")
+    StoreVarFile.write(entry_1.get())
+    Text_input_window.destroy()
+
 btn_1=ttk.Button(Text_input_window, text="SUBMIT", width=10, command=click)
 btn_1.grid(row=3, column=1, sticky=W)
 Text_input_window.mainloop()
-
 
 search_list=[]
 file_list=[]
@@ -37,6 +38,10 @@ path = Path(root.fileName)
 root.destroy()
 root.mainloop()
 
+# ************use this
+StoreVarFile_1=open(f"D:\Documents\App development/featherlook/" + TmpFlNm,"r")
+search_word= StoreVarFile_1.readline()
+StoreVarFile_1.close()
 
 for x in path.glob('*.docx'):
     try:
@@ -44,13 +49,25 @@ for x in path.glob('*.docx'):
     except:
         paragraph_list = (f"searched for: {search_word} but file could not be searched due to formatting")
 
+# search each file in directory for search_word. If in file append only the sentence and file name to corresponding lists
     for i in paragraph_list:
         if i.find(search_word)>=0:
-            search_list.append(i)
-            file_list.append(x)
+            # parse paragraph for the sentence the word is in
+            if i.count(".")== 0 or i.count(".")==1:
+                search_list.append(i)
+                file_list.append(x)
+            else:
+                while i.count(".")>1:
+                    ChrCnt=i.find(".")
+                    SntncTmp=i[0,ChrCnt]
+                    if SntncTmp.count(search_word)>0:
+                        search_list.append(SntncTmp)
+                        file_list.append(x)
+                    else:
+                        i=
 
-#print(search_list)
-#print(file_list)
+
+
 
 InfoWindow = Tk()
 
@@ -64,19 +81,22 @@ Cl_Heading_2.grid(row=1, column=4, sticky='w')
 
 file_list_dict = {}
 search_list_dict={}
-for i in range(len(file_list)):
-    file_list_dict[i] = ttk.Label(InfoWindow,text=file_list[i])
-    file_list_dict[i].grid(row=2+i, column=0, sticky='w')
-    for y in range(len(search_list)):
-        search_list_dict[y] = tk.Label(InfoWindow, text=search_list[y])
-        search_list_dict[y].grid(row=2+y, column=4, sticky='w')
 
+for i in range(len(file_list)):
+    file_list_dict[i] = ttk.Label(InfoWindow,text=file_list[i]).grid(row=2+i, column=0, sticky='w')
+    for y in range(len(search_list)):
+        search_list_dict[y] = ttk.Label(InfoWindow, text=search_list[y]).grid(row=2+y, column=4, sticky='w')
+
+# *************** delete here
+file_to_remove = os.path.join(f"D:\Documents\App development/featherlook/" + TmpFlNm)
+os.remove(file_to_remove)
 
 InfoWindow.mainloop()
 
 # counter=1
 # a=0
 # import openpyxl as xl
+
 # wb = xl.load_workbook(r"D:\Documents\Nick test folder\Search output.xlsx")
 # sheet = wb['Sheet1']
 # while a <= len(search_list)-1:
