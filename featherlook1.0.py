@@ -6,10 +6,48 @@ from tkinter import ttk
 import docx2txt
 import os
 
-# updated by costa_rica 8 Jan 2020
+# ********************************#
+# updated by costa_rica 8 Jan 2020#
+# ********************************#
+
 def end_app():
     Text_input_window.destroy()
     quit()
+
+def click():
+    StoreVarFile=open(TmpFlNm, "w+")
+    StoreVarFile.write(entry_1.get())
+    Text_input_window.destroy()
+# make function where search_word is the parameter
+# parameters for function srch_wd = the string searching for in the file,
+# Dir_1 = the directory path to search for word files,
+# Fl_Typ = could be file name but intended to use a wildcard + "." + extension,
+# srch_lst= list where sentences will get stored
+# fl_lst = list var where file paths are stored will be stored
+# fl_list needs another function to parse out the file name from the path or there is a functino for just the file names
+def function_1(srch_wd, Dir_1, Fl_Typ, srch_lst, fl_lst):
+    for x in Dir_1.glob(Fl_Typ):
+        try:
+            paragraph_list = docx2txt.process(x).splitlines()
+        except:
+            paragraph_list = (f"searched for: {srch_wd} but file could not be searched due to formatting")
+    # search each file in directory for search_word. If in file append only the sentence and file name to corresponding lists
+        for i in paragraph_list:
+            if i.find(srch_wd)>=0:
+                # parse paragraph for the sentence the word is in
+                if i.count(".")== 0 or i.count(".")==1:
+                    srch_lst.append(i)
+                    fl_lst.append(x)
+                else:
+                    while i.count(".") > 1:
+                        ChrCnt = i.find(".")
+                        SntncTmp = i[0: ChrCnt + 1]
+                        if SntncTmp.count(srch_wd) > 0:
+                            srch_lst.append(SntncTmp)
+                            fl_lst.append(x)
+                            i = i[ChrCnt + 1:].strip()
+                        else:
+                            i = i[ChrCnt + 1:].strip()
 
 ApplctnNm="Featherlook"
 Text_input_window= Tk()
@@ -20,10 +58,7 @@ label_1.grid(row=1, column=0, sticky=W)
 entry_1=ttk.Entry(Text_input_window, width=40, background="white")
 entry_1.grid(row=2, column=0, sticky=W)
 TmpFlNm="StoreVar" + ApplctnNm + ".txt"
-def click():
-    StoreVarFile=open(TmpFlNm, "w+")
-    StoreVarFile.write(entry_1.get())
-    Text_input_window.destroy()
+
 
 btn_1=ttk.Button(Text_input_window, text="SUBMIT", width=10, command=click)
 btn_1.grid(row=3, column=1, sticky=W)
@@ -33,43 +68,22 @@ search_list=[]
 file_list=[]
 
 root = Tk()
+# .withdraw() method hides the window that is used to do the .askdirectory() method.
+# we don't need it to be visible.
+root.withdraw()
 root.fileName = filedialog.askdirectory()
 path = Path(root.fileName)
 root.destroy()
 root.mainloop()
 
-# ************use this
+# search word is saved in this text file becuase i don't wnat to use the .get() method
 StoreVarFile_1=open(f"D:\Documents\App development/featherlook/" + TmpFlNm,"r")
 search_word= StoreVarFile_1.readline()
 StoreVarFile_1.close()
 x=int()
-for x in path.glob('*.docx'):
-    try:
-        paragraph_list = docx2txt.process(x).splitlines()
-    except:
-        paragraph_list = (f"searched for: {search_word} but file could not be searched due to formatting")
-# search each file in directory for search_word. If in file append only the sentence and file name to corresponding lists
-    for i in paragraph_list:
-        if i.find(search_word)>=0:
-            # parse paragraph for the sentence the word is in
-            if i.count(".")== 0 or i.count(".")==1:
-                search_list.append(i)
-                file_list.append(x)
-            else:
-                while i.count(".") > 1:
-                    # print("made it to while statement")
-                    # x += 1
-                    ChrCnt = i.find(".")
-                    SntncTmp = i[0: ChrCnt + 1]
 
-                    if SntncTmp.count(search_word) > 0:
-                        search_list.append(SntncTmp)
-                        file_list.append(x)
-
-                        i = i[ChrCnt + 1:].strip()
-                    else:
-                        i = i[ChrCnt + 1:].strip()
-
+# call Search_Dir_for_word function
+function_1(search_word, path, "*.docx",search_list, file_list)
 
 InfoWindow = Tk()
 
@@ -95,16 +109,3 @@ os.remove(file_to_remove)
 
 InfoWindow.mainloop()
 
-# counter=1
-# a=0
-# import openpyxl as xl
-
-# wb = xl.load_workbook(r"D:\Documents\Nick test folder\Search output.xlsx")
-# sheet = wb['Sheet1']
-# while a <= len(search_list)-1:
-#     #print(search_list[a])
-#     sheet.cell(counter,1).value=search_list[a]
-#     sheet.cell(counter, 2).value = str(file_list[a])
-#     counter+=1
-#     a +=1
-# wb.save(r"D:\Documents\Nick test folder\Search output.xlsx")
