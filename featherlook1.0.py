@@ -7,7 +7,7 @@ import docx2txt
 import os
 
 # ********************************#
-# updated by costa_rica 8 Jan 2020#
+# updated by costa_rica 10 Jan 2020#
 # ********************************#
 
 def end_app():
@@ -49,15 +49,22 @@ def function_1(srch_wd, Dir_1, Fl_Typ, srch_lst, fl_lst):
                         else:
                             i = i[ChrCnt + 1:].strip()
 
+
+# script is found here:
+feath_dir_and_name=__file__
+feath_name=os.path.basename(__file__)
+feath_dir=feath_dir_and_name[0:len(feath_dir_and_name)-len(feath_name)]
+
 ApplctnNm="Featherlook"
 Text_input_window= Tk()
 Text_input_window.geometry('600x350+100+200')
 Text_input_window.title(ApplctnNm +" 1.1")
+search_word=StringVar()
 label_1=Label (Text_input_window,text="Enter search word:", bg="black", fg="white")
 label_1.grid(row=1, column=0, sticky=W)
 entry_1=ttk.Entry(Text_input_window, width=40, background="white")
 entry_1.grid(row=2, column=0, sticky=W)
-TmpFlNm="StoreVar" + ApplctnNm + ".txt"
+TmpFlNm="StoreVar_" + ApplctnNm + ".txt"
 
 
 btn_1=ttk.Button(Text_input_window, text="SUBMIT", width=10, command=click)
@@ -77,7 +84,7 @@ root.destroy()
 root.mainloop()
 
 # search word is saved in this text file becuase i don't wnat to use the .get() method
-StoreVarFile_1=open(f"D:\Documents\App development/featherlook/" + TmpFlNm,"r")
+StoreVarFile_1=open(feath_dir + TmpFlNm,"r")
 search_word= StoreVarFile_1.readline()
 StoreVarFile_1.close()
 x=int()
@@ -104,7 +111,7 @@ for i in range(len(file_list)):
         search_list_dict[y] = ttk.Label(InfoWindow, text=search_list[y]).grid(row=2+y, column=4, sticky='w')
 
 # *************** delete here
-file_to_remove = os.path.join(f"D:\Documents\App development/featherlook/" + TmpFlNm)
+file_to_remove = os.path.join(feath_dir + TmpFlNm)
 os.remove(file_to_remove)
 
 InfoWindow.mainloop()
