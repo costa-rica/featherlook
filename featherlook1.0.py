@@ -5,6 +5,7 @@ from pathlib import Path
 from tkinter import ttk
 import docx2txt
 import os
+import glob
 
 # ********************************#
 # updated by costa_rica 10 Jan 2020#
@@ -26,7 +27,7 @@ def click():
 # fl_lst = list var where file paths are stored will be stored
 # fl_list needs another function to parse out the file name from the path or there is a functino for just the file names
 def function_1(srch_wd, Dir_1, Fl_Typ, srch_lst, fl_lst):
-    for x in Dir_1.glob(Fl_Typ):
+    for x in glob.glob(Dir_1 +"/"+Fl_Typ):
         try:
             paragraph_list = docx2txt.process(x).splitlines()
         except:
@@ -37,23 +38,25 @@ def function_1(srch_wd, Dir_1, Fl_Typ, srch_lst, fl_lst):
                 # parse paragraph for the sentence the word is in
                 if i.count(".")== 0 or i.count(".")==1:
                     srch_lst.append(i)
-                    fl_lst.append(x)
+                    fl_lst.append(os.path.basename(x))
                 else:
                     while i.count(".") > 1:
                         ChrCnt = i.find(".")
                         SntncTmp = i[0: ChrCnt + 1]
                         if SntncTmp.count(srch_wd) > 0:
                             srch_lst.append(SntncTmp)
-                            fl_lst.append(x)
+                            fl_lst.append(os.path.basename(x))
                             i = i[ChrCnt + 1:].strip()
                         else:
                             i = i[ChrCnt + 1:].strip()
 
 
-# script is found here:
+# getting absolute paths:
 feath_dir_and_name=__file__
 feath_name=os.path.basename(__file__)
-feath_dir=feath_dir_and_name[0:len(feath_dir_and_name)-len(feath_name)]
+# this works too
+# feath_dir=feath_dir_and_name[0:len(feath_dir_and_name)-len(feath_name)]
+feath_dir=os.path.dirname(__file__)
 
 ApplctnNm="Featherlook"
 Text_input_window= Tk()
@@ -78,19 +81,19 @@ root = Tk()
 # .withdraw() method hides the window that is used to do the .askdirectory() method.
 # we don't need it to be visible.
 root.withdraw()
-root.fileName = filedialog.askdirectory()
-path = Path(root.fileName)
+root.fileName = filedialog.askopenfilename()
+search_dir = os.path.dirname(root.fileName)
 root.destroy()
 root.mainloop()
 
 # search word is saved in this text file becuase i don't wnat to use the .get() method
-StoreVarFile_1=open(feath_dir + TmpFlNm,"r")
+StoreVarFile_1=open(feath_dir +"/"+ TmpFlNm,"r")
 search_word= StoreVarFile_1.readline()
 StoreVarFile_1.close()
 x=int()
 
 # call Search_Dir_for_word function
-function_1(search_word, path, "*.docx",search_list, file_list)
+function_1(search_word, search_dir, "*.docx",search_list, file_list)
 
 InfoWindow = Tk()
 
@@ -99,7 +102,7 @@ Close_Button = ttk.Button(InfoWindow,text="Close",command=InfoWindow.destroy)
 Close_Button.grid(row=len(search_list)+3, column=2, sticky='w')
 Cl_Heading_1 = ttk.Label(InfoWindow,text="Files:", font=("arial",10, "underline", "bold"))
 Cl_Heading_1.grid(row=1, column=0, sticky='w')
-Cl_Heading_2 = ttk.Label(InfoWindow,text="Paragraph word found in:", font=("arial",10, "underline", "bold"))
+Cl_Heading_2 = ttk.Label(InfoWindow,text="Sentence word found in:", font=("arial",10, "underline", "bold"))
 Cl_Heading_2.grid(row=1, column=4, sticky='w')
 
 file_list_dict = {}
@@ -111,7 +114,7 @@ for i in range(len(file_list)):
         search_list_dict[y] = ttk.Label(InfoWindow, text=search_list[y]).grid(row=2+y, column=4, sticky='w')
 
 # *************** delete here
-file_to_remove = os.path.join(feath_dir + TmpFlNm)
+file_to_remove = os.path.join(feath_dir+"/" + TmpFlNm)
 os.remove(file_to_remove)
 
 InfoWindow.mainloop()
