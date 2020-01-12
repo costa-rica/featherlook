@@ -7,9 +7,9 @@ import docx2txt
 import os
 import glob
 
-# ********************************#
-# updated by costa_rica 10 Jan 2020#
-# ********************************#
+# *********************************#
+# updated by costa_rica 12 Jan 2020#
+# *********************************#
 
 def end_app():
     Text_input_window.destroy()
@@ -50,13 +50,16 @@ def function_1(srch_wd, Dir_1, Fl_Typ, srch_lst, fl_lst):
                         else:
                             i = i[ChrCnt + 1:].strip()
 
-
-# getting absolute paths:
-feath_dir_and_name=__file__
-feath_name=os.path.basename(__file__)
-# this works too
-# feath_dir=feath_dir_and_name[0:len(feath_dir_and_name)-len(feath_name)]
-feath_dir=os.path.dirname(__file__)
+# getting path from .exe
+if getattr(sys, 'frozen', False):
+    feath_name = os.path.basename(sys.executable)
+    feath_dir = os.path.dirname(sys.executable)
+    feath_dir_and_name = sys.executable.replace('\\', '/')
+# getting absolute paths for .py:
+elif __file__:
+    feath_dir_and_name=__file__.replace('\\','/')
+    feath_name=os.path.basename(__file__)
+    feath_dir=os.path.dirname(__file__).replace('\\','/')
 
 ApplctnNm="Featherlook"
 Text_input_window= Tk()
@@ -86,11 +89,27 @@ search_dir = os.path.dirname(root.fileName)
 root.destroy()
 root.mainloop()
 
+# Store_1=feath_dir.replace('\\','//') +"/"+ TmpFlNm
+Store_1=feath_dir +"/"+ TmpFlNm
+
+
+# make new window to tell me paths and names
+path_names_window=Tk()
+path_names_window.title("See path names")
+path_names_window.geometry('300x300+70+400')
+# text_1=Text(path_names_window,width=100, height=20, wrap='word')
+label_2=ttk.Label(path_names_window,text=Store_1, font=("arial",10, "underline", "bold"))
+label_2.grid(row=1, column=1, sticky='w')
+path_names_window.mainloop()
 # search word is saved in this text file becuase i don't wnat to use the .get() method
-StoreVarFile_1=open(feath_dir +"/"+ TmpFlNm,"r")
+StoreVarFile_1=open(feath_dir.replace('\\','//') +"/"+ TmpFlNm,"r")
+# StoreVarFile_1=open(feath_dir +"/"+ TmpFlNm,"r")
+# print(StoreVarFile_1)
+Store_1=feath_dir.replace('\\','//') +"/"+ TmpFlNm
 search_word= StoreVarFile_1.readline()
 StoreVarFile_1.close()
 x=int()
+
 
 # call Search_Dir_for_word function
 function_1(search_word, search_dir, "*.docx",search_list, file_list)
@@ -105,6 +124,9 @@ Cl_Heading_1.grid(row=1, column=0, sticky='w')
 Cl_Heading_2 = ttk.Label(InfoWindow,text="Sentence word found in:", font=("arial",10, "underline", "bold"))
 Cl_Heading_2.grid(row=1, column=4, sticky='w')
 
+# need to make this into a textbox to have scrollbar or at least it seems the .yview attribtue won't work on a Label
+# scroll_1 = ttk.Scrollbar(InfoWindow, orient='vertical', command= Cl_Heading_2.yview)
+
 file_list_dict = {}
 search_list_dict={}
 
@@ -113,8 +135,10 @@ for i in range(len(file_list)):
     for y in range(len(search_list)):
         search_list_dict[y] = ttk.Label(InfoWindow, text=search_list[y]).grid(row=2+y, column=4, sticky='w')
 
-# *************** delete here
-file_to_remove = os.path.join(feath_dir+"/" + TmpFlNm)
+# *************** delete temporary text file here
+# feath_dir="D:\Documents\App development\\featherlook\dist"
+file_to_remove = feath_dir+'/' + TmpFlNm
+# print(file_to_remove)
 os.remove(file_to_remove)
 
 InfoWindow.mainloop()
