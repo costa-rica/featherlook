@@ -1,0 +1,382 @@
+import tkinter as tk
+import tkinter.ttk as ttk
+import os #needed for 1)if getattr(sys
+from tkinter import * #needed for 1)if getattr(sys
+from PIL import ImageTk, Image
+from tkinter.filedialog import askdirectory #needed circa row221 for getting directory to search
+import glob
+import docx2txt
+
+# *********************************#
+# updated by costa_rica 20 Feb 2020#
+# *********************************#
+ApplctnNm="Featherlook"
+Version="1.4"
+about_featherlook="""
+Featherlook:
+  1.entered text to search (above)
+  2.select directory to search MS Word files
+"""
+direction_1="""
+ Select a folder to search in the next window.
+ It shows files but regardless of the
+ file selected, it searches through all 
+ files for the word(s) entered
+ """
+window_color_1='gray50'
+window_color_light='gray80'
+
+
+class Win(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.columnconfigure(0, weight=1) #widgets in column 0 growth in proportion to window
+        self.rowconfigure(2, weight=1) #widgets in row 2 growth in proportion to window
+        self.overrideredirect(True) #removes default window settings
+        self.wm_geometry("423x362")
+        self.minsize(400, 360)
+        self.x = 0 #declared for the button_press function
+        self.y = 0 #declared for the button_press function
+        self.bg_img_path=feath_dir.replace('\\','/') +"/Featherlook_addFiles/InputWindowPic_2.JPG"
+
+        # three lines below work to show image on label
+        self.bg_img=Image.open(self.bg_img_path,mode='r')
+        self.bg_img=self.bg_img.resize((900,1030),Image.ANTIALIAS)
+        self.bg_img = ImageTk.PhotoImage(self.bg_img)
+        tk.Label(self, image=self.bg_img).grid(row=1, column=0,sticky='sw')
+
+        title_bar_2 = tk.Frame(self, height=25, bg='SteelBlue1', relief='raised', bd=1)
+        title_bar_2.grid(row=0, column=0, sticky='ew')
+        # # image/logo works
+        self.logo = Image.open(feath_dir.replace('\\','/') +"/Featherlook_addFiles/featherlook_20200202_1045.gif",mode='r')
+        self.logo=self.logo.resize((20,20),Image.ANTIALIAS)
+        self.logo=ImageTk.PhotoImage(self.logo)
+        tk.Label(title_bar_2, image=self.logo, bg='SteelBlue1').pack(side='left')
+        tk.Button(title_bar_2, text='X', command=self.exit_command).pack(fill='x', side="right")
+        tk.Label(title_bar_2,text=ApplctnNm+" "+Version,bg='SteelBlue1').pack(side='left')
+        self.canvas_2 = tk.Canvas(self, bg=window_color_1)
+        self.canvas_2.create_text(110, 50, fill='blue', font='helvetica 19',text="Enter search word:")
+        self.canvas_2.grid(row=1, column=0, sticky='nw')
+
+        grip = ttk.Sizegrip(self)
+        grip.place(relx=1.0, rely=1.0, anchor="se")
+        self.entry_1 = tk.Entry(self.canvas_2, width=60, background="white")
+        self.entry_1.bind('<Return>', self.click_2)  # effectively binds "submit" button to enter key - not really but basically
+        self.entry_1.grid(row=1, column=0, sticky='n', pady=70)
+        self.entry_1.focus()  # activates the entry box when the window opens
+
+        self.btn_1 = tk.Button(self.canvas_2, text="search", width=10, command=self.click_2, bg=window_color_light)
+        self.btn_1.grid(row=1, column=0, pady=100, padx=35, sticky='nw')
+        self.btn_2 = tk.Button(self.canvas_2, text="exit", width=10, command=self.exit_command, bg=window_color_light)
+        self.btn_2.grid(row=1, column=0, pady=100, padx=40, sticky='ne')
+
+        self.frame_1 = Frame(self.canvas_2, width=390, height=70, bg='gray20')
+        self.frame_1.grid(row=1, column=0, pady=100, padx=10, sticky='s')
+        canvas_1 = Canvas(self.frame_1, width=380, height=60, bg='gray80')
+        canvas_1.grid(row=1, column=0, pady=10, padx=10)
+        canvas_1.create_text(175, 30, fill='black', font='helvetica 10', text=about_featherlook)
+        self.canvas_2.grid_rowconfigure(1, pad=50) #This is used to make the row/canvas_2 bigger so it fits the way i want
+
+        # file_limit = 0
+        self.checkCmd = IntVar()
+        self.checkBox1 = tk.Checkbutton(self.canvas_2, variable=self.checkCmd, text="Limit search to 10 documents", bg=window_color_1)
+        self.checkBox1.grid(row=1, column=0, pady=30, padx=10, sticky='sw')
+        self.checkBox1.select()
+
+        title_bar_2.bind('<ButtonPress-1>', self.button_press)
+        title_bar_2.bind('<B1-Motion>', self.move_window)
+
+
+    def move_window(self, event):
+        x = self.winfo_pointerx() - self.x
+        y = self.winfo_pointery() - self.y
+        self.geometry('+{}+{}'.format(x, y))
+
+    def button_press(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def click_2(self, *args):#to use this we need 'self.' everywhere ... still donnno why but this works as expected
+        StoreVarFile = open(TmpFlNm, "w+")
+        StoreVarFile.write(self.entry_1.get())
+        if self.checkCmd.get() == 1:
+            global file_limit
+            file_limit = 12
+        else:
+            file_limit = 10000
+        win.destroy()
+
+
+    def exit_command(self):
+        if getattr(sys, 'frozen', False):
+            sys.exit()
+        else:
+            quit()
+            exit()
+
+
+class Win_2(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.columnconfigure(0, weight=1) #widgets in column 0 growth in proportion to window
+        self.rowconfigure(2, weight=1) #widgets in row 2 growth in proportion to window
+        self.overrideredirect(True) #removes default window settings
+        self.wm_geometry("1500x800")
+        self.minsize(400, 400)
+        self.x = 0 #declared for the button_press function
+        self.y = 0 #declared for the button_press function
+        self.bg_img_path=feath_dir.replace('\\','/') +"/Featherlook_addFiles/InputWindowPic_2.JPG"
+        self.bg_img=Image.open(self.bg_img_path,mode='r')
+        self.bg_img=self.bg_img.resize((1700,1310),Image.ANTIALIAS)
+        self.bg_img = ImageTk.PhotoImage(self.bg_img)
+        tk.Label(self, image=self.bg_img).grid(row=1, column=0,sticky='sw')
+
+        # logo needs to be adjusted but ok for now
+        title_bar_3 = tk.Frame(self, height=25, bg='SteelBlue1', relief='raised', bd=1)
+        title_bar_3.grid(row=0, column=0, sticky='ew')
+        tk.Button(title_bar_3, text='X', command=self.destroy).pack(fill='x', side="right")
+
+        # # image/logo works
+        self.logo=Image.open(feath_dir.replace('\\','/') +"/Featherlook_addFiles/featherlook_20200202_1045.gif",mode='r')
+        self.logo=self.logo.resize((20,20),Image.ANTIALIAS)
+        self.logo=ImageTk.PhotoImage(self.logo)
+        tk.Label(title_bar_3, image=self.logo, bg='SteelBlue1').pack(side='left')
+
+        tk.Label(title_bar_3,text=ApplctnNm+" "+Version,bg='SteelBlue1').pack(side='left')
+        self.canvas_3 = tk.Canvas(self, bg=window_color_1)
+        # self.canvas_3.create_text(110, 30, fill='blue', font='helvetica 19',text="WE made it to Win_2")
+        self.canvas_3.grid(row=1, column=0, sticky='nw')
+
+        grip = ttk.Sizegrip(self)
+        grip.place(relx=1.0, rely=1.0, anchor="se")
+
+        if Search_word_found==True:
+            # This code builds a function that allows for other windows to come in front when activated
+            # otherwise InfoWindow just stays out in front.
+            self.scrollwidget = scroll_link(self.canvas_3)
+        else:
+            self.canvas_3.create_text(400, 190, fill='white', font='helvetica 44', text='"'+search_word+'" not found')
+            self.canvas_3.config(width=830, height=450)
+            # self.canvas_3.grid_columnconfigure(0, minsize=600)
+            # self.canvas_3.grid_rowconfigure(index, minsize=600)
+
+        self.attributes('-topmost', True)
+        title_bar_3.focus_force()
+        title_bar_3.bind('<FocusIn>', self.OnFocusIn)
+
+        title_bar_3.bind('<ButtonPress-1>', self.button_press)
+        title_bar_3.bind('<B1-Motion>', self.move_window)
+
+
+    def move_window(self, event):
+        x = self.winfo_pointerx() - self.x
+        y = self.winfo_pointery() - self.y
+        self.geometry('+{}+{}'.format(x, y))
+
+    def button_press(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def OnFocusIn(self,event):
+        if type(event.widget).__name__ == 'Tk':
+            event.widget.attributes('-topmost', False)
+
+# making class for linking scrollbar to two text widgets
+# PlaceholderVar is something i thought needed to be Win_2 when it was nested. NOw i don't know what it is?
+class scroll_link:
+    def __init__(self, PlaceholderVar):
+        label_1=Label(PlaceholderVar,text="File name")
+        label_1.grid(row=2, column=0, sticky='we')
+        label_1=Label(PlaceholderVar,text="Sentence containing search word")
+        label_1.grid(row=2, column=2, sticky='we')
+        scroll_1 = Scrollbar(PlaceholderVar, orient=VERTICAL, command=self.yview)
+        scroll_2 = Scrollbar(PlaceholderVar, orient=HORIZONTAL, command=self.xview_1)
+        scroll_3 = Scrollbar(PlaceholderVar, orient=HORIZONTAL, command=self.xview_2)
+        self.text_1 = Text(PlaceholderVar, width=30, height=25, yscrollcommand=scroll_1.set)
+        self.text_1 = Text(PlaceholderVar, width=30, height=25, yscrollcommand=scroll_3.set)
+        self.text_2 = Text(PlaceholderVar, width=80, height=25, yscrollcommand=scroll_1.set)
+        self.text_2 = Text(PlaceholderVar, width=80, height=25, xscrollcommand=scroll_2.set)
+        scroll_1.grid(row=3, column=3, sticky='ns')
+        scroll_3.grid(row=4, column=0, sticky='ew')
+        scroll_2.grid(row=4, column=2, sticky='ew')
+        self.text_1.grid(row=3, column=0)
+        self.text_2.grid(row=3, column=2)
+
+        c = 1
+        width_temp = 30
+        width_temp_2 = 60
+        width_temp_2_FLAG = False
+        while c < len(sentence_list):
+            if sentence_list[c][5] == True:
+                if len(sentence_list[c][0]) > width_temp and len(sentence_list[c][0]) > 60:
+                    width_temp = 60
+                else:
+                    width_temp = len(sentence_list[c][0]) + 15
+                if len(sentence_list[c][6]) > 60:
+                    width_temp_2 = 80
+                    width_temp_2_FLAG = True
+                elif width_temp_2_FLAG == False:
+                    width_temp_2 = len(sentence_list[c][0]) + 15
+                self.text_1.insert('1.0', sentence_list[c][0] + "\n")
+                self.text_2.insert('1.0', sentence_list[c][6].strip() + '\n')
+            c += 1
+        self.text_1.configure(state='disabled', width=width_temp, wrap='none')
+        self.text_2.configure(state='disabled', width=width_temp_2, wrap='none')
+
+    def xview_1(self, *args):
+        self.text_2.xview(*args)
+
+    def yview(self, *args):
+        self.text_1.yview(*args)
+        self.text_2.yview(*args)
+
+    def xview_2(self, *args):
+        self.text_1.xview(*args)
+
+# search_word_temp_1 is the search word for function1
+# dir_1 is the directory to search under
+# file_type_1 is *.docx for this app
+# word_doc_to_text is the word document beign serached split into a list
+# file_temp is just the name of the file (path stripped form the variable)
+# file_list is universal to the app --- let's see if this can tranfer to the next function
+def function_1(search_word_temp,dir_1, file_type_1):
+    file_count=0
+    for file_1 in os.listdir(dir_1):
+        if not file_1.startswith('~'):
+            try:
+                if file_count>=file_limit:
+                    break
+                if docx2txt.process(dir_1 +"/"+ file_1).count(search_word_temp) == 0:
+                    word_doc_to_text.append([os.path.basename(file_1), False, docx2txt.process(dir_1 +"/"+ file_1)])
+                elif docx2txt.process(dir_1 +"/"+ file_1).count(search_word_temp)>0:
+                    word_doc_to_text.append([os.path.basename( file_1), True, docx2txt.process(dir_1 +"/"+ file_1)])
+                    global Search_word_found
+                    Search_word_found=True
+            except:
+                continue
+            file_count +=1
+
+    print(file_count)
+    function_2(search_word_temp,word_doc_to_text)
+
+# search_word_temp_2 is just the searchword var name in function_2
+# para_list_1 is the paragraph_list from function_1
+def function_2(search_word_temp, text):
+    # I can do a for loop in one of two ways at this juncture and neither give me what i want. If i do a for
+    # loop on just text i get the number elements in the row - based on function_1 that would be 3 elements.
+    # however i do the loop on text[a][2] - the element i want to parse, the third element in the ath row the
+    # loop iterates over the number of characters in that element. It doesnt' seem i can parse from the for loop.
+    # taking len(text) returns the number of rows. This is exactly tne number i want to iterate but on the
+    # third element of each row.
+    a = 1
+    while a< len(text):
+        text_parsed=text[a][2].split('\n')
+        para_counter=1
+        while para_counter<len(text_parsed):
+            para_temp =text_parsed[para_counter]
+            try:
+                if para_counter>=paragraph_limit:
+                    break
+                elif para_temp.count(search_word_temp)>0:
+                    para_list.append([text[a][0],text[a][1],text[a][2],True,para_temp])
+                elif para_temp.count(search_word_temp) == 0:
+                    para_list.append([text[a][0],text[a][1],text[a][2], False, para_temp])
+            except IndexError:
+                break
+            para_counter+=1
+        a+=1
+    function_3(search_word_temp,para_list)
+
+
+def function_3(search_word_temp, para_list_1):
+    b=1
+    if Search_word_found==False:
+        sentence_list.append(["Found no matching words"," "," "," "," ","True"," "])
+    while b<len(para_list_1) and Search_word_found==True:
+        para_f3=para_list_1[b][4]
+        if para_f3.count(".")>1:
+            while para_f3.count(".")>1:
+                sentence=para_f3[:para_f3.find('.')+1]
+                para_f3=para_f3[len(sentence):]
+                if sentence.count(search_word_temp)>0:
+                    sentence_list.append([para_list_1[b][0],para_list_1[b][1],\
+                                         para_list_1[b][2],para_list_1[b][3],\
+                                         para_list_1[b][4],True,sentence])
+                else:
+                    sentence_list.append([para_list_1[b][0],para_list_1[b][1],\
+                                         para_list_1[b][2], para_list_1[b][3],\
+                                         para_list_1[b][4],False,sentence])
+        else:
+            sentence=para_f3
+            if sentence.count(search_word_temp) > 0:
+                sentence_list.append([para_list_1[b][0], para_list_1[b][1], \
+                                      para_list_1[b][2], para_list_1[b][3], \
+                                      para_list_1[b][4], True, sentence])
+            else:
+                sentence_list.append([para_list_1[b][0], para_list_1[b][1], \
+                                      para_list_1[b][2], para_list_1[b][3], \
+                                      para_list_1[b][4], False, sentence])
+        b+=1
+
+
+# getting path from .exe
+if getattr(sys, 'frozen', False):
+    feath_name = os.path.basename(sys.executable)
+    feath_dir = os.path.dirname(sys.executable)
+    feath_dir_and_name = sys.executable.replace('\\', '/')
+# getting absolute paths for .py:
+elif __file__:
+    feath_dir_and_name=__file__.replace('\\','/')
+    feath_name=os.path.basename(__file__)
+    feath_dir=os.path.dirname(__file__).replace('\\','/')
+
+
+TmpFlNm = "StoreVar_" + ApplctnNm + ".txt"
+
+win = Win()
+
+win.mainloop()
+
+# Prompt for directory to search
+root = Tk()
+root.withdraw()
+search_dir = askdirectory()
+if not search_dir:
+    quit()
+root.destroy()
+root.mainloop()
+# print(search_dir)
+
+StoreVarFile_1=open(feath_dir.replace('\\','/') +"/"+ TmpFlNm,"r")
+Store_1=feath_dir.replace('\\','/') +"/"+ TmpFlNm
+search_word= StoreVarFile_1.readline()
+StoreVarFile_1.close()
+
+# variables and things needed for file and word parser Function_1, Function_2 and Function_3:
+# para_sentence_limit=4
+# file_limit=50
+search_list=[]
+file_list=[]
+paragraph_limit=1000
+word_doc_to_text=[[]]
+para_list=[[]]
+sentence_list=[[]]
+Search_word_found=False
+
+
+function_1(search_word,search_dir,"*.docx")
+# function_1 searches all the docx files in dir for search_word then passes them off to
+# function_2 which searches every paragraph or text between line breaks for serach_word then passes off to
+# function_3 which searches every sentnece or text beteen "." for search word
+# these produce a few lists but the list of interest is sentence_list.
+# sentence list is a 2d list with 7 columns (file name, binomial for word found in file, text in file,
+# binomial for word found in paragraph, paragraph, binomial for word found in sentence, sentence).
+# There are as many rows are there are sentneces found across all files.
+
+
+# Search results window
+InfoWindow = Win_2()
+# deletes textfile that stores search word
+file_to_remove = feath_dir+'/' + TmpFlNm
+os.remove(file_to_remove)
+InfoWindow.mainloop()
