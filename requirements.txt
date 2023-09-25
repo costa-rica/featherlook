@@ -7,7 +7,7 @@ docx==0.2.4
 docx2txt==0.8
 Eel==0.11.0
 future==0.18.2
-gevent==1.4.0
+gevent==23.9.1
 gevent-websocket==0.10.1
 greenlet==0.4.15
 lxml==4.4.2
